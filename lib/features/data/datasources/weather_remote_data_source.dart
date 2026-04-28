@@ -6,6 +6,9 @@ abstract class WeatherRemoteDataSource {
   /// Calls the Open-Meteo API.
   /// Throws a [ServerException] for all error codes.
   Future<WeatherModel> getWeather(String city);
+
+  /// Calls the Open-Meteo Geocoding API to get city suggestions.
+  Future<List<String>> searchCities(String query);
 }
 
 class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
@@ -42,6 +45,32 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
     } catch (e) {
       // In Dart, exceptions are caught by the repository
       throw Exception('Failed to fetch weather data');
+    }
+  }
+
+  @override
+  Future<List<String>> searchCities(String query) async {
+    // Prevent unnecessary API calls for single letters
+    if (query.length < 2) return [];
+
+    final url = 'https://geocoding-api.open-meteo.com/v1/search?name=$query&count=5';
+
+    try {
+      final response = await client.get(Uri.parse(url));
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (!data.containsKey('results')) return [];
+
+        final results = data['results'] as List;
+        return results.map((cityData) {
+          final name = cityData['name'];
+          final country = cityData['country'] ?? '';
+          return '$name, $country';
+        }).toList();
+      }
+      return [];
+    } catch (e) {
+      return [];
     }
   }
 }

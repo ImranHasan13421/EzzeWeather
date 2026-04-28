@@ -15,7 +15,17 @@ class WeatherRepositoryImpl implements WeatherRepository {
       final remoteWeather = await remoteDataSource.getWeather(city);
       return Right(remoteWeather);
     } catch (e) {
-      return Left(ServerFailure()); // You would define this in core/error
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> searchCities(String query) async {
+    try {
+      final cities = await remoteDataSource.searchCities(query);
+      return Right(cities);
+    } catch (e) {
+      return Left(ServerFailure());
     }
   }
 }

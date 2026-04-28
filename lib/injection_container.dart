@@ -5,6 +5,7 @@ import 'features/data/datasources/weather_remote_data_source.dart';
 import 'features/data/repositories/weather_repository_impl.dart';
 import 'features/weather/domain/repositories/weather_repository.dart';
 import 'features/weather/domain/usecases/get_current_weather.dart';
+import 'features/weather/domain/usecases/search_cities.dart';
 import 'features/presentation/bloc/weather_bloc.dart';
 
 final sl = GetIt.instance; // sl stands for Service Locator
@@ -15,6 +16,7 @@ void init() {
 
   // Use Cases
   sl.registerLazySingleton(() => GetCurrentWeather(sl()));
+  sl.registerLazySingleton(() => SearchCities(sl())); // <-- NEW
 
   // Repository
   sl.registerLazySingleton<WeatherRepository>(
