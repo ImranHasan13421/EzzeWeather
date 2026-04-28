@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
 import '../../../../core/error/failures.dart';
-import '../../domain/entities/weather.dart';
-import '../../domain/repositories/weather_repository.dart';
+import 'package:ezze_weather/features/weather/domain/entities/weather.dart';
+import 'package:ezze_weather/features/weather/domain/repositories/weather_repository.dart';
 import '../datasources/weather_remote_data_source.dart';
 
 class WeatherRepositoryImpl implements WeatherRepository {

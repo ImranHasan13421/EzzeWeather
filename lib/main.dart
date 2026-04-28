@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'injection_container.dart' as di;
+import 'features/presentation/bloc/weather_bloc.dart';
+import 'features/presentation/pages/home_screen.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Initialize dependency injection
+  di.init();
+
   runApp(const EzzeWeatherApp());
 }
 
@@ -12,13 +20,16 @@ class EzzeWeatherApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'EzzeWeather',
-      debugShowCheckedModeBanner: false, // Hides the debug banner
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        fontFamily: 'Roboto', // You can change this later
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
         useMaterial3: true,
       ),
-      home: const HomeScreen(),
+      // Provide the WeatherBloc to the widget tree
+      home: BlocProvider(
+        create: (_) => di.sl<WeatherBloc>(),
+        child: const HomeScreen(),
+      ),
     );
   }
 }

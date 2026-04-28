@@ -1,4 +1,4 @@
-import '../../domain/entities/weather.dart';
+import 'package:ezze_weather/features/weather/domain/entities/weather.dart';
 
 class WeatherModel extends Weather {
   const WeatherModel({
