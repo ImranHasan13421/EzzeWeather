@@ -35,7 +35,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
 
       // 2. Get Weather
       final weatherResponse = await client.get(Uri.parse(
-          '$weatherUrl?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code'));
+          '$weatherUrl?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,wind_speed_10m&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto'));
 
       if (weatherResponse.statusCode == 200) {
         return WeatherModel.fromJson(jsonDecode(weatherResponse.body), cityName);
@@ -44,7 +44,7 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       }
     } catch (e) {
       // In Dart, exceptions are caught by the repository
-      throw Exception('Failed to fetch weather data');
+      throw Exception('Failed to fetch weather data: $e');
     }
   }
 
