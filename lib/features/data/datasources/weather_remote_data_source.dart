@@ -7,6 +7,9 @@ abstract class WeatherRemoteDataSource {
   /// Throws a [ServerException] for all error codes.
   Future<WeatherModel> getWeather(String city);
 
+  /// Calls the Open-Meteo API by coordinates.
+  Future<WeatherModel> getWeatherByCoordinates(double lat, double lon, String? cityName);
+
   /// Calls the Open-Meteo Geocoding API to get city suggestions.
   Future<List<String>> searchCities(String query);
 }
@@ -44,6 +47,24 @@ class WeatherRemoteDataSourceImpl implements WeatherRemoteDataSource {
       }
     } catch (e) {
       // In Dart, exceptions are caught by the repository
+      throw Exception('Failed to fetch weather data: $e');
+    }
+  }
+
+  @override
+  Future<WeatherModel> getWeatherByCoordinates(double lat, double lon, String? cityName) async {
+    const weatherUrl = 'https://api.open-meteo.com/v1/forecast';
+
+    try {
+      final weatherResponse = await client.get(Uri.parse(
+          '$weatherUrl?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code,relative_humidity_2m,apparent_temperature,wind_speed_10m&hourly=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=auto'));
+
+      if (weatherResponse.statusCode == 200) {
+        return WeatherModel.fromJson(jsonDecode(weatherResponse.body), cityName ?? 'Current Location');
+      } else {
+        throw Exception('Server Error');
+      }
+    } catch (e) {
       throw Exception('Failed to fetch weather data: $e');
     }
   }

@@ -20,6 +20,16 @@ class WeatherRepositoryImpl implements WeatherRepository {
   }
 
   @override
+  Future<Either<Failure, Weather>> getCurrentWeatherByCoordinates(double lat, double lon, String? cityName) async {
+    try {
+      final remoteWeather = await remoteDataSource.getWeatherByCoordinates(lat, lon, cityName);
+      return Right(remoteWeather);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
   Future<Either<Failure, List<String>>> searchCities(String query) async {
     try {
       final cities = await remoteDataSource.searchCities(query);

@@ -12,9 +12,43 @@ import '../widgets/daily_forecast_list.dart';
 // Import dependency injection and the new Use Case
 import 'package:ezze_weather/injection_container.dart' as di;
 import 'package:ezze_weather/features/weather/domain/usecases/search_cities.dart';
+import 'search_result_screen.dart';
+import 'settings_screen.dart';
+import '../../../../core/settings/settings_cubit.dart';
+import '../../../../core/services/location_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialWeather();
+  }
+
+  Future<void> _loadInitialWeather() async {
+    final settings = context.read<SettingsCubit>().state;
+    if (settings.isLocationEnabled) {
+      final locationService = di.sl<LocationService>();
+      final position = await locationService.getCurrentLocation();
+      if (position != null && mounted) {
+        context.read<WeatherBloc>().add(
+          GetWeatherForCoordinates(position.latitude, position.longitude),
+        );
+        return;
+      }
+    }
+    
+    // Fallback to default location
+    if (mounted) {
+      context.read<WeatherBloc>().add(GetWeatherForCity(settings.defaultLocation));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +73,20 @@ class HomeScreen extends StatelessWidget {
               elevation: 0,
               pinned: true,
               expandedHeight: 120,
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.settings),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                    ).then((_) {
+                      // Reload weather if settings changed
+                      _loadInitialWeather();
+                    });
+                  },
+                ),
+              ],
               flexibleSpace: FlexibleSpaceBar(
                 titlePadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                 title: Text(
@@ -116,7 +164,10 @@ class HomeScreen extends StatelessWidget {
       },
       onSelected: (String selection) {
         final cityName = selection.split(',').first;
-        context.read<WeatherBloc>().add(GetWeatherForCity(cityName));
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => SearchResultScreen(cityName: cityName)),
+        );
       },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
         return Container(
@@ -143,7 +194,10 @@ class HomeScreen extends StatelessWidget {
                 onPressed: () {
                   if (controller.text.isNotEmpty) {
                     final cityName = controller.text.split(',').first;
-                    context.read<WeatherBloc>().add(GetWeatherForCity(cityName));
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => SearchResultScreen(cityName: cityName)),
+                    );
                     focusNode.unfocus();
                   }
                 },
@@ -152,7 +206,10 @@ class HomeScreen extends StatelessWidget {
             onSubmitted: (value) {
               if (value.isNotEmpty) {
                 final cityName = value.split(',').first;
-                context.read<WeatherBloc>().add(GetWeatherForCity(cityName));
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => SearchResultScreen(cityName: cityName)),
+                );
                 focusNode.unfocus();
               }
             },
